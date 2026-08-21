@@ -9,7 +9,11 @@
 
 grafana:
   adminPassword: admin
-  defaultDashboardsEnabled: true
+  # The stock default dashboards (cluster/node/pod overview boards) lean
+  # heavily on kube-state-metrics, which is disabled below — they'd just
+  # render empty panels. Our own dashboard (loaded via the sidecar) is the
+  # one that matters here.
+  defaultDashboardsEnabled: false
   sidecar:
     dashboards:
       enabled: true
@@ -43,15 +47,18 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
 
+# Disabled: nothing in this project defines alert rules or consumes
+# host-level metrics or per-label pod metadata. Keeping these off saves a
+# real chunk of the ~3.7GB budget and, just as importantly, reduces the CPU
+# contention that was causing other pods' liveness probes to fail (see the
+# Grafana probe-timing fix above and the commit history). The core proof
+# this project cares about — Rollouts' canary analysis gated on
+# nginx_up via Prometheus — depends on none of these three.
 alertmanager:
-  enabled: true
-  alertmanagerSpec:
-    resources:
-      requests: { cpu: 25m, memory: 64Mi }
-      limits: { cpu: 100m, memory: 128Mi }
+  enabled: false
 
 nodeExporter:
-  enabled: true
+  enabled: false
 
 kubeStateMetrics:
-  enabled: true
+  enabled: false
