@@ -26,8 +26,17 @@ spec:
       provider:
         prometheus:
           address: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+          # No join needed: the ServiceMonitor's relabeling already stamps
+          # `namespace` and `service` onto nginx_up directly (confirmed via
+          # `curl .../api/v1/query?query=nginx_up`). An earlier version of
+          # this query joined against kube_pod_labels for extra safety, but
+          # that metric doesn't exist in this cluster at all — modern
+          # kube-state-metrics makes per-label metrics opt-in via
+          # --metric-labels-allowlist, off by default — so the join always
+          # returned empty and crashed the analysis ("reflect: slice index
+          # out of range" from indexing an empty result). Simpler and it
+          # actually works.
           query: |
-            avg(nginx_up{namespace="{{args.namespace}}"} * on(pod) group_left()
-              kube_pod_labels{label_app_kubernetes_io_name="pipeline-dashboard"})
+            avg(nginx_up{namespace="{{args.namespace}}", service="pipeline-dashboard"})
   args:
     - name: namespace

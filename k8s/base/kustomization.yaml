@@ -7,7 +7,15 @@ resources:
   - service.yaml
   - ingress.yaml
 
+# includeSelectors MUST be false: kustomize's label transformer knows how
+# to stamp extra labels into a Service's selector (a well-known kind) but
+# has no idea a Rollout (argoproj.io/v1alpha1, a CRD) has a pod template at
+# spec.template.metadata.labels. With includeSelectors: true, the Service
+# ends up requiring a label the Rollout's actual pods never get, so the
+# Service has zero endpoints and looks "up" while silently routing to
+# nothing. Discovered by watching the app's ServiceMonitor never resolve
+# any Prometheus target and tracing it back to an empty Endpoints object.
 labels:
   - pairs:
       app.kubernetes.io/part-of: ai-cicd-pipeline
-    includeSelectors: true
+    includeSelectors: false

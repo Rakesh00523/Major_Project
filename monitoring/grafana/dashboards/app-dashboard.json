@@ -49,8 +49,8 @@
       "gridPos": { "h": 6, "w": 6, "x": 6, "y": 8 },
       "targets": [
         {
-          "comment": "Counts pods by label rather than kube_deployment_status_replicas — the app is managed by an Argo Rollout, not a Deployment, so there's no Deployment object to query.",
-          "expr": "count(kube_pod_labels{label_app_kubernetes_io_name=\"pipeline-dashboard\"})",
+          "comment": "Counts scraped exporter instances rather than kube_deployment_status_replicas (no Deployment object exists — this is an Argo Rollout) or kube_pod_labels (per-label metrics are opt-in in this kube-state-metrics install and aren't enabled). Each app pod's nginx-exporter sidecar is one series.",
+          "expr": "count(nginx_up)",
           "legendFormat": "pods"
         }
       ]

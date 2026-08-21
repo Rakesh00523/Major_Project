@@ -18,6 +18,19 @@ grafana:
   resources:
     requests: { cpu: 50m, memory: 128Mi }
     limits: { cpu: 200m, memory: 256Mi }
+  # Plugin loading on a contended laptop CPU regularly takes 20-30s; the
+  # chart's default probe timing kills the pod before it finishes starting,
+  # producing a genuine restart loop (observed locally: 3 restarts under
+  # concurrent ArgoCD + Prometheus image pulls). More tolerant timing fixes
+  # it without touching resource requests.
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    failureThreshold: 6
+  readinessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    failureThreshold: 6
 
 prometheus:
   prometheusSpec:
