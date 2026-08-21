@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: pipeline-prod
+
+resources:
+  - ../../base
+
+images:
+  - name: ghcr.io/your-org/pipeline-dashboard
+    newTag: placeholder
+
+replicas:
+  - name: pipeline-dashboard
+    count: 2
+
+patches:
+  - target:
+      kind: Ingress
+      name: pipeline-dashboard
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: pipeline-dashboard.local

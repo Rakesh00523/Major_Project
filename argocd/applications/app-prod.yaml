@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pipeline-dashboard-prod
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/your-org/ai-cicd-pipeline.git
+    targetRevision: main
+    path: k8s/overlays/prod
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pipeline-prod
+
+  # Deliberately NOT automated: prod promotion is a manual `argocd app sync`
+  # (or a click in the UI) after verifying the dev environment, unlike dev
+  # which self-heals and auto-syncs on every merge to main.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

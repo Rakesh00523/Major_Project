@@ -1,0 +1,27 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import AppLayout from './components/AppLayout'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
+import Deployments from './pages/Deployments'
+import PullRequests from './pages/PullRequests'
+import Settings from './pages/Settings'
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+
+      <Route element={<AppLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/deployments" element={<Deployments />} />
+        <Route path="/pull-requests" element={<PullRequests />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  )
+}
+
+export default App

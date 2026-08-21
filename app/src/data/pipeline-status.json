@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-08-21T09:00:00Z",
+  "pipeline": {
+    "name": "ai-cicd-pipeline",
+    "defaultBranch": "main",
+    "registry": "ghcr.io/your-org/pipeline-dashboard"
+  },
+  "builds": [
+    { "id": "run-1042", "commitSha": "a1c9e21", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T08:41:00Z", "durationSeconds": 214 },
+    { "id": "run-1041", "commitSha": "7fb03aa", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-20T15:12:00Z", "durationSeconds": 231 },
+    { "id": "run-1040", "commitSha": "22e19cd", "branch": "feature/nav-fix", "author": "siri", "status": "failed", "startedAt": "2026-08-20T11:03:00Z", "durationSeconds": 96 },
+    { "id": "run-1039", "commitSha": "9b8d4e0", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-19T18:22:00Z", "durationSeconds": 208 },
+    { "id": "run-1038", "commitSha": "d40f712", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-19T09:47:00Z", "durationSeconds": 227 },
+    { "id": "run-1037", "commitSha": "5aa9c88", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-18T14:05:00Z", "durationSeconds": 198 },
+    { "id": "run-1036", "commitSha": "f001b3e", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-17T10:31:00Z", "durationSeconds": 241 }
+  ],
+  "aiReview": {
+    "provider": "Google Gemini",
+    "model": "gemini-2.0-flash",
+    "history": [
+      {
+        "pr": "#128",
+        "title": "Add retry logic to the image upload handler",
+        "author": "siri",
+        "reviewedAt": "2026-08-21T08:39:00Z",
+        "findingsCount": 3,
+        "verdict": "advisory",
+        "summary": "Flagged an unhandled promise rejection in the upload handler and two minor naming inconsistencies. No blocking issues."
+      },
+      {
+        "pr": "#127",
+        "title": "Bump dependency versions for Vite 8",
+        "author": "siri",
+        "reviewedAt": "2026-08-20T15:05:00Z",
+        "findingsCount": 0,
+        "verdict": "clean",
+        "summary": "No significant issues found."
+      },
+      {
+        "pr": "#126",
+        "title": "fix: nav highlight not clearing on route change",
+        "author": "siri",
+        "reviewedAt": "2026-08-20T10:58:00Z",
+        "findingsCount": 1,
+        "verdict": "advisory",
+        "summary": "Suggested using NavLink's isActive callback instead of manual pathname comparison to avoid a stale-state edge case."
+      },
+      {
+        "pr": "#125",
+        "title": "Add Trivy severity thresholds to cd.yml",
+        "author": "siri",
+        "reviewedAt": "2026-08-19T18:10:00Z",
+        "findingsCount": 2,
+        "verdict": "advisory",
+        "summary": "Recommended pinning the trivy-action version and failing on HIGH in addition to CRITICAL."
+      }
+    ]
+  },
+  "sonarqube": {
+    "qualityGate": "Passed",
+    "bugs": 0,
+    "vulnerabilities": 0,
+    "codeSmells": 12,
+    "coverage": 78.4,
+    "duplicatedLines": 1.2,
+    "analyzedAt": "2026-08-21T08:44:00Z"
+  },
+  "security": {
+    "trivy": {
+      "imageRef": "ghcr.io/your-org/pipeline-dashboard:a1c9e21",
+      "critical": 0,
+      "high": 1,
+      "medium": 4,
+      "low": 9,
+      "scannedAt": "2026-08-21T08:52:00Z"
+    },
+    "sbom": {
+      "format": "SPDX 2.3",
+      "packageCount": 342,
+      "generatedAt": "2026-08-21T08:53:00Z",
+      "tool": "Syft"
+    },
+    "cosign": {
+      "signed": true,
+      "keyless": true,
+      "issuer": "https://token.actions.githubusercontent.com",
+      "signedAt": "2026-08-21T08:55:00Z"
+    }
+  },
+  "environments": [
+    {
+      "name": "dev",
+      "status": "Synced",
+      "health": "Healthy",
+      "imageTag": "a1c9e21",
+      "replicas": 1,
+      "lastSync": "2026-08-21T08:57:00Z",
+      "syncedBy": "ArgoCD (auto)"
+    },
+    {
+      "name": "prod",
+      "status": "Synced",
+      "health": "Healthy",
+      "imageTag": "7fb03aa",
+      "replicas": 2,
+      "lastSync": "2026-08-20T15:20:00Z",
+      "syncedBy": "ArgoCD (auto)"
+    }
+  ]
+}

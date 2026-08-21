@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  lint-and-test:
+    name: Lint & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (with coverage)
+        run: npm run test:coverage
+
+      - name: Production build (fail-fast check)
+        run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: app/coverage
+          retention-days: 7
+
+  ai-review:
+    name: AI code review (Gemini)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate PR diff
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD -- . ':(exclude)package-lock.json' > /tmp/pr.diff
+          echo "Diff size: $(wc -l < /tmp/pr.diff) lines"
+
+      - name: Run Gemini review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          DIFF_FILE: /tmp/pr.diff
+        run: node ../scripts/ai-review.mjs
+        continue-on-error: true # AI review is advisory, never blocks the merge
+
+  sonarqube:
+    name: SonarQube quality gate
+    runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/api/system/status | grep -q '\"status\":\"UP\"'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wait for SonarQube to be ready
+        run: |
+          for i in $(seq 1 30); do
+            status=$(curl -s http://localhost:9000/api/system/status | grep -o '"status":"[A-Z]*"' || true)
+            echo "SonarQube status: $status"
+            [[ "$status" == '"status":"UP"' ]] && exit 0
+            sleep 5
+          done
+          echo "SonarQube never became ready" && exit 1
+
+      - name: Generate analysis token
+        id: sonar-token
+        run: |
+          TOKEN=$(curl -s -u admin:admin -X POST \
+            "http://localhost:9000/api/user_tokens/generate?name=ci-$(date +%s)" \
+            | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: SonarQube scan
+        uses: sonarsource/sonarqube-scan-action@v4
+        env:
+          SONAR_HOST_URL: http://localhost:9000
+          SONAR_TOKEN: ${{ steps.sonar-token.outputs.token }}
+        with:
+          projectBaseDir: app

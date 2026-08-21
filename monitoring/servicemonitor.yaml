@@ -1,0 +1,19 @@
+# Tells the kube-prometheus-stack Prometheus instance to scrape the
+# nginx-prometheus-exporter sidecar running alongside the app (see
+# k8s/base/deployment.yaml). Apply this in each namespace the app runs in
+# (pipeline-dev, pipeline-prod), or add it as a resource in the relevant
+# Kustomize overlay.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pipeline-dashboard
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pipeline-dashboard
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s

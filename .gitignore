@@ -1,0 +1,18 @@
+# Node
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Build/scan artifacts
+sbom*.json
+trivy-results.sarif
+*.log

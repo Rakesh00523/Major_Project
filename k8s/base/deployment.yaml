@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-dashboard
+  labels:
+    app.kubernetes.io/name: pipeline-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pipeline-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pipeline-dashboard
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/your-org/pipeline-dashboard:placeholder
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+        # Sidecar: scrapes nginx's internal stub_status and exposes it in
+        # Prometheus format on :9113/metrics for the ServiceMonitor to pick up.
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:1.3.0
+          args:
+            - '-nginx.scrape-uri=http://127.0.0.1:8080/nginx_status'
+          ports:
+            - name: metrics
+              containerPort: 9113
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
