@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import PipelineControl from './pages/PipelineControl'
 import Deployments from './pages/Deployments'
 import PullRequests from './pages/PullRequests'
 import AiInsights from './pages/AiInsights'
@@ -16,6 +17,7 @@ function App() {
 
       <Route element={<AppLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/pipeline-control" element={<PipelineControl />} />
         <Route path="/deployments" element={<Deployments />} />
         <Route path="/pull-requests" element={<PullRequests />} />
         <Route path="/ai-insights" element={<AiInsights />} />

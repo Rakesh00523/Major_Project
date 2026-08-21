@@ -53,12 +53,18 @@ export default function Security() {
                 <dt className="text-xs uppercase tracking-wide text-slate-400">Registry</dt>
                 <dd className="mt-1 font-mono text-slate-700 dark:text-slate-300">
                   {pipeline.registry}
+                  <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-sans uppercase tracking-wide text-slate-400 dark:bg-slate-800">
+                    placeholder path
+                  </span>
                 </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-400">Signature</dt>
                 <dd className="mt-1 text-slate-700 dark:text-slate-300">
                   Keyless via Sigstore/Fulcio, issuer {security.cosign.issuer}
+                  <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-sans uppercase tracking-wide text-slate-400 dark:bg-slate-800">
+                    production config
+                  </span>
                 </dd>
               </div>
               <div>

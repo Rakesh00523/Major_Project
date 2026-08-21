@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 
@@ -59,6 +59,23 @@ describe('App routing', () => {
     renderAt('/security')
     expect(screen.getByRole('heading', { name: /^security$/i })).toBeInTheDocument()
     expect(screen.getByText(/service-level objectives/i)).toBeInTheDocument()
+  })
+
+  it('runs a demo scenario at /pipeline-control and reaches a blocked gate', () => {
+    vi.useFakeTimers()
+    renderAt('/pipeline-control')
+    expect(screen.getByRole('heading', { name: /pipeline control/i })).toBeInTheDocument()
+
+    fireEvent.change(screen.getByDisplayValue(/successful deployment/i), {
+      target: { value: 'security_failure' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /run scenario/i }))
+
+    act(() => vi.advanceTimersByTime(20_000))
+
+    expect(screen.getByText(/not safe to promote/i)).toBeInTheDocument()
+    expect(screen.getByText(/critical: 1 finding/i)).toBeInTheDocument()
+    vi.useRealTimers()
   })
 
   it('falls back to the dashboard for unknown routes', () => {

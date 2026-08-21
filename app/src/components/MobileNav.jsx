@@ -10,11 +10,13 @@ import {
   GitPullRequest,
   Sparkles,
   ShieldCheck,
+  PlayCircle,
 } from 'lucide-react'
 import clsx from 'clsx'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/pipeline-control', label: 'Pipeline Control', icon: PlayCircle },
   { to: '/deployments', label: 'Deployments', icon: Rocket },
   { to: '/pull-requests', label: 'Code Reviews', icon: GitPullRequest },
   { to: '/ai-insights', label: 'AI Insights', icon: Sparkles },
