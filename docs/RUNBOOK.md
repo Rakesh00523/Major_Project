@@ -161,6 +161,27 @@ the canary is torn down and the stable version keeps serving, with zero
 manual intervention. Restore the working scrape-uri arg to return to a
 clean state.
 
+## 5b. Drive the same demo from the dashboard's "Live cluster" tab
+
+`control-api/` is a small local Node server that runs exactly the kubectl
+commands above on your behalf, so the Pipeline Control page's buttons can
+trigger the real thing instead of a client-side animation:
+
+```bash
+cd control-api
+npm install
+npm start   # listens on 127.0.0.1:4001, localhost only
+```
+
+Then open the app, go to **Pipeline Control**, and switch to the **Live
+cluster** tab — it polls real `kubectl` status every 3s. "Deploy for real"
+triggers an actual new Rollout revision; "Inject real failure" reproduces
+the broken-canary demo above end to end, with the UI showing the real
+`Progressing -> Paused -> Degraded` phase transitions and the real
+AnalysisRun value as they happen. If `control-api` isn't running (or
+Minikube is stopped), the tab says so and the page still works fine via
+the Demo simulation tab.
+
 ## 6. Promote dev → prod
 
 ```bash
