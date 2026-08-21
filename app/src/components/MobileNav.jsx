@@ -1,12 +1,24 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Menu, X, LayoutDashboard, Rocket, Settings, GitBranch, GitPullRequest } from 'lucide-react'
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Rocket,
+  Settings,
+  GitBranch,
+  GitPullRequest,
+  Sparkles,
+  ShieldCheck,
+} from 'lucide-react'
 import clsx from 'clsx'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/deployments', label: 'Deployments', icon: Rocket },
   { to: '/pull-requests', label: 'Pull Requests', icon: GitPullRequest },
+  { to: '/ai-insights', label: 'AI Insights', icon: Sparkles },
+  { to: '/security', label: 'Security', icon: ShieldCheck },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

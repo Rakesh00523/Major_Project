@@ -8,14 +8,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: app
-
 jobs:
   lint-and-test:
     name: Lint & unit tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +60,7 @@ jobs:
 
       - name: Generate PR diff
         run: |
-          git diff origin/${{ github.base_ref }}...HEAD -- . ':(exclude)package-lock.json' > /tmp/pr.diff
+          git diff origin/${{ github.base_ref }}...HEAD -- . ':(exclude)**/package-lock.json' > /tmp/pr.diff
           echo "Diff size: $(wc -l < /tmp/pr.diff) lines"
 
       - name: Run Gemini review
@@ -71,7 +70,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           DIFF_FILE: /tmp/pr.diff
-        run: node ../scripts/ai-review.mjs
+        run: node scripts/ai-review.mjs
         continue-on-error: true # AI review is advisory, never blocks the merge
 
   sonarqube:

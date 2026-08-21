@@ -4,6 +4,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Deployments from './pages/Deployments'
 import PullRequests from './pages/PullRequests'
+import AiInsights from './pages/AiInsights'
+import Security from './pages/Security'
 import Settings from './pages/Settings'
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/deployments" element={<Deployments />} />
         <Route path="/pull-requests" element={<PullRequests />} />
+        <Route path="/ai-insights" element={<AiInsights />} />
+        <Route path="/security" element={<Security />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

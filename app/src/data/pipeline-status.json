@@ -25,7 +25,22 @@
         "reviewedAt": "2026-08-21T08:39:00Z",
         "findingsCount": 3,
         "verdict": "advisory",
-        "summary": "Flagged an unhandled promise rejection in the upload handler and two minor naming inconsistencies. No blocking issues."
+        "summary": "Flagged an unhandled promise rejection in the upload handler and two minor naming inconsistencies. No blocking issues.",
+        "riskScore": 78,
+        "riskLevel": "high",
+        "reasons": [
+          "Modified authentication middleware",
+          "Changed database access layer",
+          "3 files affect production API",
+          "Test coverage decreased by 6%"
+        ],
+        "recommendedTests": [
+          "Authentication regression",
+          "Session expiry",
+          "Unauthorized API access",
+          "Database connection failure"
+        ],
+        "recommendation": "manual_approval"
       },
       {
         "pr": "#127",
@@ -34,7 +49,12 @@
         "reviewedAt": "2026-08-20T15:05:00Z",
         "findingsCount": 0,
         "verdict": "clean",
-        "summary": "No significant issues found."
+        "summary": "No significant issues found.",
+        "riskScore": 8,
+        "riskLevel": "low",
+        "reasons": ["Dependency-only change", "No production code paths touched"],
+        "recommendedTests": ["Full regression suite (standard for dependency bumps)"],
+        "recommendation": "auto_deploy"
       },
       {
         "pr": "#126",
@@ -43,7 +63,12 @@
         "reviewedAt": "2026-08-20T10:58:00Z",
         "findingsCount": 1,
         "verdict": "advisory",
-        "summary": "Suggested using NavLink's isActive callback instead of manual pathname comparison to avoid a stale-state edge case."
+        "summary": "Suggested using NavLink's isActive callback instead of manual pathname comparison to avoid a stale-state edge case.",
+        "riskScore": 22,
+        "riskLevel": "low",
+        "reasons": ["UI-only change", "No API or data-layer impact"],
+        "recommendedTests": ["Navigation regression"],
+        "recommendation": "auto_deploy"
       },
       {
         "pr": "#125",
@@ -52,9 +77,44 @@
         "reviewedAt": "2026-08-19T18:10:00Z",
         "findingsCount": 2,
         "verdict": "advisory",
-        "summary": "Recommended pinning the trivy-action version and failing on HIGH in addition to CRITICAL."
+        "summary": "Recommended pinning the trivy-action version and failing on HIGH in addition to CRITICAL.",
+        "riskScore": 35,
+        "riskLevel": "medium",
+        "reasons": ["Changes CI/CD gating behavior", "Could block future merges if misconfigured"],
+        "recommendedTests": ["Dry-run the workflow on a throwaway PR"],
+        "recommendation": "manual_approval"
       }
     ]
+  },
+  "aiInsights": {
+    "windowDays": 30,
+    "failurePrediction": { "low": 68, "medium": 21, "high": 11 },
+    "topFailureCauses": [
+      { "cause": "Test failures", "pct": 34 },
+      { "cause": "Security scans", "pct": 27 },
+      { "cause": "Build failures", "pct": 19 },
+      { "cause": "Quality gate", "pct": 12 },
+      { "cause": "Deployment", "pct": 8 }
+    ]
+  },
+  "dora": {
+    "deploymentFrequencyPerMonth": 18.4,
+    "leadTimeMinutes": 23,
+    "changeFailureRatePct": 4.2,
+    "mttrMinutes": 6.8
+  },
+  "slo": {
+    "availabilityPct": { "target": 99, "current": 99.82 },
+    "httpSuccessPct": { "target": 99.5, "current": 99.91 },
+    "p95LatencyMs": { "target": 500, "current": 312 },
+    "deploymentSuccessPct": { "target": 95, "current": 97.4 },
+    "errorBudgetRemainingPct": 78
+  },
+  "secretScanning": {
+    "tool": "Gitleaks",
+    "lastScanAt": "2026-08-21T08:38:00Z",
+    "secretsFound": 0,
+    "status": "clean"
   },
   "sonarqube": {
     "qualityGate": "Passed",
@@ -104,7 +164,14 @@
       "imageTag": "7fb03aa",
       "replicas": 2,
       "lastSync": "2026-08-20T15:20:00Z",
-      "syncedBy": "ArgoCD (auto)"
+      "syncedBy": "ArgoCD (auto)",
+      "rollout": {
+        "strategy": "canary",
+        "phase": "Healthy",
+        "canaryWeightPct": 0,
+        "steps": [25, 50, 100],
+        "analysis": "success-rate >= 95% via Prometheus"
+      }
     }
   ]
 }

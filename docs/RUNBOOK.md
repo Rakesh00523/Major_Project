@@ -40,7 +40,12 @@ docker run --rm -p 8080:8080 pipeline-dashboard:local
 ## 4. Minikube cluster + ArgoCD
 
 ```bash
-minikube start --cpus=4 --memory=6g
+# Check what Docker Desktop actually has available first:
+docker info | grep -i memory
+# Then size minikube to fit (adjust down if you hit "Docker Desktop has only
+# NMB memory but you specified..." -- this repo was validated at 3400mb/3
+# cpus against a Docker Desktop instance capped at ~3.7GB):
+minikube start --cpus=3 --memory=3400mb --driver=docker
 minikube addons enable ingress
 
 kubectl create namespace argocd

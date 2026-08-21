@@ -1,11 +1,17 @@
-import { Sparkles } from 'lucide-react'
+import { Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react'
 import Topbar from '../components/Topbar'
+import RiskScoreBar from '../components/RiskScoreBar'
 import { timeAgo } from '../lib/format'
 import pipelineStatus from '../data/pipeline-status.json'
 
 const VERDICT_STYLES = {
   clean: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
   advisory: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+}
+
+const RECOMMENDATION = {
+  auto_deploy: { label: 'Safe to deploy', icon: CheckCircle2, className: 'text-emerald-600 dark:text-emerald-400' },
+  manual_approval: { label: 'Manual approval required', icon: AlertTriangle, className: 'text-amber-600 dark:text-amber-400' },
 }
 
 export default function PullRequests() {
@@ -46,10 +52,45 @@ export default function PullRequests() {
 
             <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{entry.summary}</p>
 
-            <div className="mt-3 flex items-center gap-3 text-xs text-slate-400">
-              <span>{entry.author}</span>
-              <span>·</span>
-              <span>{timeAgo(entry.reviewedAt)}</span>
+            <div className="mt-4">
+              <RiskScoreBar score={entry.riskScore} level={entry.riskLevel} />
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Reasons</p>
+                <ul className="mt-1 space-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {entry.reasons.map((r) => (
+                    <li key={r}>• {r}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Suggested tests</p>
+                <ul className="mt-1 space-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {entry.recommendedTests.map((t) => (
+                    <li key={t}>✓ {t}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+              <div className="flex items-center gap-3 text-slate-400">
+                <span>{entry.author}</span>
+                <span>·</span>
+                <span>{timeAgo(entry.reviewedAt)}</span>
+              </div>
+              {(() => {
+                const rec = RECOMMENDATION[entry.recommendation]
+                const Icon = rec.icon
+                return (
+                  <span className={`flex items-center gap-1 font-medium ${rec.className}`}>
+                    <Icon size={14} />
+                    {rec.label}
+                  </span>
+                )
+              })()}
             </div>
           </div>
         ))}

@@ -1,16 +1,27 @@
-# React + Vite
+# Pipeline Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The demo application for the [AI-Augmented CI/CD Pipeline](../README.md) —
+a React + Vite SaaS-style dashboard that visualizes the pipeline's own build
+history, security scan results, and deployment status.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev            # start the dev server
+npm run lint           # oxlint
+npm run test           # vitest
+npm run test:coverage  # vitest with coverage report
+npm run build          # production build to dist/
+```
 
-## React Compiler
+## Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/pages/` — Login, Dashboard, Deployments, Pull Requests, Settings
+- `src/components/` — Sidebar, Topbar, MobileNav, charts, tables
+- `src/data/pipeline-status.json` — the mock/live data every page renders
+- `src/lib/` — small theme and formatting helpers
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+See [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) for how this app fits
+into the rest of the pipeline, and [`Dockerfile`](Dockerfile) for how it's
+containerized (multi-stage build, nginx-alpine runtime, non-root user).

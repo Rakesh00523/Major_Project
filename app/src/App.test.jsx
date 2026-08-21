@@ -35,6 +35,18 @@ describe('App routing', () => {
     expect(screen.getByText('#128')).toBeInTheDocument()
   })
 
+  it('renders failure prediction and top causes at /ai-insights', () => {
+    renderAt('/ai-insights')
+    expect(screen.getByRole('heading', { name: /ai insights/i })).toBeInTheDocument()
+    expect(screen.getByText(/top failure causes/i)).toBeInTheDocument()
+  })
+
+  it('renders scan results and SLOs at /security', () => {
+    renderAt('/security')
+    expect(screen.getByRole('heading', { name: /^security$/i })).toBeInTheDocument()
+    expect(screen.getByText(/service-level objectives/i)).toBeInTheDocument()
+  })
+
   it('falls back to the dashboard for unknown routes', () => {
     renderAt('/does-not-exist')
     expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
