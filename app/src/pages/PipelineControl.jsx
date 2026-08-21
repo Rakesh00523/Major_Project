@@ -1,15 +1,23 @@
 import { useState } from 'react'
-import { Rocket, FlaskConical, RotateCcw } from 'lucide-react'
+import { Rocket, FlaskConical, RotateCcw, Radio, MonitorPlay } from 'lucide-react'
+import clsx from 'clsx'
 import Topbar from '../components/Topbar'
 import PipelineRunTimeline from '../components/PipelineRunTimeline'
 import ReleaseReadinessGate from '../components/ReleaseReadinessGate'
 import DeploymentStory from '../components/DeploymentStory'
+import LiveClusterPanel from '../components/LiveClusterPanel'
 import { useScenarioRunner } from '../lib/useScenarioRunner'
 import { SCENARIOS } from '../data/scenarios'
 
 const SCENARIO_OPTIONS = Object.entries(SCENARIOS).map(([key, s]) => ({ key, label: s.label }))
 
+const TABS = [
+  { key: 'demo', label: 'Demo simulation', icon: MonitorPlay },
+  { key: 'live', label: 'Live cluster', icon: Radio },
+]
+
 export default function PipelineControl() {
+  const [mode, setMode] = useState('demo')
   const [scenarioKey, setScenarioKey] = useState('successful_deployment')
   const runner = useScenarioRunner()
   const scenario = SCENARIOS[scenarioKey]
@@ -22,10 +30,37 @@ export default function PipelineControl() {
     <>
       <Topbar
         title="Pipeline Control"
-        subtitle="Run the real stage sequence and demo scenarios — clearly-labeled simulation, not a live cluster action"
+        subtitle={
+          mode === 'live'
+            ? 'Real kubectl commands against the actual Minikube cluster'
+            : 'Clearly-labeled simulation replaying real verified data — not a live cluster action'
+        }
       />
 
       <main className="flex-1 space-y-6 p-6">
+        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setMode(key)}
+              className={clsx(
+                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                mode === key
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800',
+              )}
+            >
+              <Icon size={15} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {mode === 'live' && <LiveClusterPanel />}
+
+        {mode === 'demo' && (
+          <>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">
             Run the pipeline
@@ -139,6 +174,8 @@ export default function PipelineControl() {
         )}
 
         {isDone && scenarioKey === 'successful_deployment' && <DeploymentStory />}
+          </>
+        )}
       </main>
     </>
   )
