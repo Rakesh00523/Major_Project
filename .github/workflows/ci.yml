@@ -9,6 +9,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  secret-scan:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # No GITLEAKS_LICENSE needed — that's only for the paid org features;
+        # the scan itself is free and open-source. A leaked credential fails
+        # this job, which blocks the merge exactly like a CRITICAL CVE would.
+
   lint-and-test:
     name: Lint & unit tests
     runs-on: ubuntu-latest

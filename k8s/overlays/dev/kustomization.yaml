@@ -6,11 +6,19 @@ namespace: pipeline-dev
 resources:
   - ../../base
 
-images:
-  - name: ghcr.io/your-org/pipeline-dashboard
-    newTag: placeholder
-
+# NOTE: kustomize's `images:` transformer doesn't recognize the custom
+# `Rollout` kind (argoproj.io/v1alpha1), so it silently leaves the image tag
+# unchanged. We patch the image directly instead — this is also what
+# scripts/bump-image-tag.mjs and scripts/promote.mjs edit.
 patches:
+  - target:
+      kind: Rollout
+      name: pipeline-dashboard
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: ghcr.io/your-org/pipeline-dashboard:placeholder
+
   - target:
       kind: Ingress
       name: pipeline-dashboard

@@ -1,5 +1,9 @@
-apiVersion: apps/v1
-kind: Deployment
+# Progressive delivery via Argo Rollouts. Requires the Argo Rollouts
+# controller + CRDs to be installed in the cluster first (see
+# docs/RUNBOOK.md) — `kubectl apply` on this file will fail with
+# "no matches for kind Rollout" otherwise.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: pipeline-dashboard
   labels:
@@ -9,6 +13,22 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: pipeline-dashboard
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - pause: { duration: 30s }
+        - analysis:
+            templates:
+              - templateName: exporter-health
+            args:
+              - name: namespace
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+        - setWeight: 50
+        - pause: { duration: 30s }
+        - setWeight: 100
   template:
     metadata:
       labels:
@@ -41,7 +61,8 @@ spec:
               memory: 128Mi
 
         # Sidecar: scrapes nginx's internal stub_status and exposes it in
-        # Prometheus format on :9113/metrics for the ServiceMonitor to pick up.
+        # Prometheus format on :9113/metrics for the ServiceMonitor and the
+        # canary AnalysisTemplate to read.
         - name: nginx-exporter
           image: nginx/nginx-prometheus-exporter:1.3.0
           args:

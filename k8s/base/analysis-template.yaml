@@ -1,0 +1,33 @@
+# Gates the canary's promotion (and drives automatic rollback) on a live
+# Prometheus query. This demo template checks the nginx-exporter sidecar's
+# reachability (`nginx_up`) — an honest, always-available signal, since the
+# stock nginx stub_status module (what nginx-prometheus-exporter reads)
+# doesn't expose per-status-code request counts, so a true HTTP error-rate
+# query isn't available from this exporter.
+#
+# For a real production success-rate gate, swap the query below for one of:
+#   - ingress-nginx controller metrics, which DO carry a `status` label:
+#     sum(rate(nginx_ingress_controller_requests{ingress="pipeline-dashboard",status=~"5.."}[2m]))
+#     / sum(rate(nginx_ingress_controller_requests{ingress="pipeline-dashboard"}[2m]))
+#     with successCondition: result[0] <= 0.05
+#   - or an app-level RED metrics exporter (e.g. prom-client) if the app
+#     itself starts serving dynamic requests instead of a static SPA.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: exporter-health
+spec:
+  metrics:
+    - name: exporter-up
+      interval: 15s
+      count: 4
+      successCondition: result[0] == 1
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            avg(nginx_up{namespace="{{args.namespace}}"} * on(pod) group_left()
+              kube_pod_labels{label_app_kubernetes_io_name="pipeline-dashboard"})
+  args:
+    - name: namespace
