@@ -5,6 +5,7 @@ export default function CanaryProgress({ rollout }) {
 
   const { phase, canaryWeightPct, steps, analysis } = rollout
   const isHealthy = phase === 'Healthy'
+  const isPending = phase === 'Not started'
 
   return (
     <div className="mt-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
@@ -15,9 +16,9 @@ export default function CanaryProgress({ rollout }) {
         <span
           className={clsx(
             'font-semibold',
-            isHealthy
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-amber-600 dark:text-amber-400',
+            isHealthy && 'text-emerald-600 dark:text-emerald-400',
+            isPending && 'text-slate-400 dark:text-slate-500',
+            !isHealthy && !isPending && 'text-amber-600 dark:text-amber-400',
           )}
         >
           {phase}

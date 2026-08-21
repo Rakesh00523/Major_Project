@@ -71,8 +71,16 @@ export default function Security() {
                 </dd>
               </div>
             </dl>
+            {security.cosign.note && (
+              <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                {security.cosign.note}
+              </p>
+            )}
           </div>
         </div>
+        {security.trivy.note && (
+          <p className="-mt-4 text-xs text-slate-400">{security.trivy.note}</p>
+        )}
 
         <SloPanel slo={slo} />
       </main>

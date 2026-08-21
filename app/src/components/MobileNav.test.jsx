@@ -11,13 +11,13 @@ describe('MobileNav', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.queryByText('Pull Requests')).not.toBeInTheDocument()
+    expect(screen.queryByText('Code Reviews')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /open navigation/i }))
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Deployments')).toBeInTheDocument()
-    expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    expect(screen.getByText('Code Reviews')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
   })
 

@@ -1,7 +1,7 @@
 import { Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react'
 import Topbar from '../components/Topbar'
 import RiskScoreBar from '../components/RiskScoreBar'
-import { timeAgo } from '../lib/format'
+import { shortSha, timeAgo } from '../lib/format'
 import pipelineStatus from '../data/pipeline-status.json'
 
 const VERDICT_STYLES = {
@@ -20,8 +20,8 @@ export default function PullRequests() {
   return (
     <>
       <Topbar
-        title="Pull Requests"
-        subtitle={`AI review history via ${provider} (${model})`}
+        title="Code Reviews"
+        subtitle={`AI review history via ${provider} (${model}) — real commits from tonight's build`}
       />
 
       <main className="flex-1 space-y-4 p-6">
@@ -33,8 +33,8 @@ export default function PullRequests() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                    {entry.pr}
+                  <span className="font-data text-sm font-semibold text-slate-900 dark:text-white">
+                    {shortSha(entry.pr)}
                   </span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${VERDICT_STYLES[entry.verdict]}`}

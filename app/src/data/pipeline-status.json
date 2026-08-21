@@ -1,100 +1,147 @@
 {
-  "generatedAt": "2026-08-21T09:00:00Z",
+  "generatedAt": "2026-08-21T16:40:00Z",
   "pipeline": {
     "name": "ai-cicd-pipeline",
     "defaultBranch": "main",
     "registry": "ghcr.io/your-org/pipeline-dashboard"
   },
+  "repoOverview": {
+    "contributors": 1,
+    "commits": 8,
+    "pullRequestsReviewed": 4,
+    "releaseIntervalHours": 0.3,
+    "devRelease": { "tag": "e7350c7", "ageHours": 0.05 },
+    "prodRelease": { "tag": null, "status": "Awaiting promotion" },
+    "deployedPct": 100,
+    "stageDurations": [
+      { "key": "lint", "label": "Lint", "seconds": 1, "tool": "oxlint" },
+      { "key": "test", "label": "Unit tests", "seconds": 8, "tool": "Vitest" },
+      { "key": "build", "label": "Build", "seconds": 3, "tool": "Vite" },
+      { "key": "docker", "label": "Docker build", "seconds": 45, "tool": "Docker" },
+      { "key": "trivy", "label": "Trivy scan", "seconds": 15, "tool": "Trivy" },
+      { "key": "canary", "label": "Canary analysis", "seconds": 60, "tool": "Argo Rollouts" }
+    ]
+  },
   "builds": [
-    { "id": "run-1042", "commitSha": "a1c9e21", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T08:41:00Z", "durationSeconds": 214 },
-    { "id": "run-1041", "commitSha": "7fb03aa", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-20T15:12:00Z", "durationSeconds": 231 },
-    { "id": "run-1040", "commitSha": "22e19cd", "branch": "feature/nav-fix", "author": "siri", "status": "failed", "startedAt": "2026-08-20T11:03:00Z", "durationSeconds": 96 },
-    { "id": "run-1039", "commitSha": "9b8d4e0", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-19T18:22:00Z", "durationSeconds": 208 },
-    { "id": "run-1038", "commitSha": "d40f712", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-19T09:47:00Z", "durationSeconds": 227 },
-    { "id": "run-1037", "commitSha": "5aa9c88", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-18T14:05:00Z", "durationSeconds": 198 },
-    { "id": "run-1036", "commitSha": "f001b3e", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-17T10:31:00Z", "durationSeconds": 241 }
+    { "id": "e7350c7", "commitSha": "e7350c7", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:38:04Z", "durationSeconds": 62, "message": "fix: grafana was still crashlooping under real CPU throttling, not just probe timing" },
+    { "id": "7283185", "commitSha": "7283185", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:25:42Z", "durationSeconds": 58, "message": "perf: drop alertmanager/node-exporter/kube-state-metrics from monitoring stack" },
+    { "id": "b7849b6", "commitSha": "b7849b6", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:19:48Z", "durationSeconds": 12, "message": "docs: rewrite runbook/README/architecture around the six differentiators" },
+    { "id": "be77952", "commitSha": "be77952", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:18:06Z", "durationSeconds": 134, "message": "fix: three real bugs found by actually running the canary rollout live" },
+    { "id": "32d32cc", "commitSha": "32d32cc", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:30:55Z", "durationSeconds": 141, "message": "feat: progressive delivery via Argo Rollouts + Prometheus-gated auto-rollback" },
+    { "id": "9a70cf6", "commitSha": "9a70cf6", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:24:50Z", "durationSeconds": 47, "message": "feat: AI risk scoring, DORA/SLO metrics, canary rollout UI, AI Insights + Security pages" },
+    { "id": "c31abbf", "commitSha": "c31abbf", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:06:01Z", "durationSeconds": 96, "message": "fix(docker): patch base image CVEs before they hit the Trivy gate" },
+    { "id": "012cf00", "commitSha": "012cf00", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T14:50:34Z", "durationSeconds": 39, "message": "Initial scaffold: AI-augmented CI/CD pipeline with Pipeline Dashboard demo app" }
   ],
   "aiReview": {
     "provider": "Google Gemini",
     "model": "gemini-2.0-flash",
     "history": [
       {
-        "pr": "#128",
-        "title": "Add retry logic to the image upload handler",
+        "pr": "32d32cc",
+        "title": "feat: progressive delivery via Argo Rollouts + Prometheus-gated auto-rollback",
         "author": "siri",
-        "reviewedAt": "2026-08-21T08:39:00Z",
-        "findingsCount": 3,
-        "verdict": "advisory",
-        "summary": "Flagged an unhandled promise rejection in the upload handler and two minor naming inconsistencies. No blocking issues.",
-        "riskScore": 78,
-        "riskLevel": "high",
-        "reasons": [
-          "Modified authentication middleware",
-          "Changed database access layer",
-          "3 files affect production API",
-          "Test coverage decreased by 6%"
-        ],
-        "recommendedTests": [
-          "Authentication regression",
-          "Session expiry",
-          "Unauthorized API access",
-          "Database connection failure"
-        ],
-        "recommendation": "manual_approval"
-      },
-      {
-        "pr": "#127",
-        "title": "Bump dependency versions for Vite 8",
-        "author": "siri",
-        "reviewedAt": "2026-08-20T15:05:00Z",
-        "findingsCount": 0,
-        "verdict": "clean",
-        "summary": "No significant issues found.",
-        "riskScore": 8,
-        "riskLevel": "low",
-        "reasons": ["Dependency-only change", "No production code paths touched"],
-        "recommendedTests": ["Full regression suite (standard for dependency bumps)"],
-        "recommendation": "auto_deploy"
-      },
-      {
-        "pr": "#126",
-        "title": "fix: nav highlight not clearing on route change",
-        "author": "siri",
-        "reviewedAt": "2026-08-20T10:58:00Z",
-        "findingsCount": 1,
-        "verdict": "advisory",
-        "summary": "Suggested using NavLink's isActive callback instead of manual pathname comparison to avoid a stale-state edge case.",
-        "riskScore": 22,
-        "riskLevel": "low",
-        "reasons": ["UI-only change", "No API or data-layer impact"],
-        "recommendedTests": ["Navigation regression"],
-        "recommendation": "auto_deploy"
-      },
-      {
-        "pr": "#125",
-        "title": "Add Trivy severity thresholds to cd.yml",
-        "author": "siri",
-        "reviewedAt": "2026-08-19T18:10:00Z",
+        "reviewedAt": "2026-08-21T15:30:55Z",
         "findingsCount": 2,
         "verdict": "advisory",
-        "summary": "Recommended pinning the trivy-action version and failing on HIGH in addition to CRITICAL.",
-        "riskScore": 35,
-        "riskLevel": "medium",
-        "reasons": ["Changes CI/CD gating behavior", "Could block future merges if misconfigured"],
-        "recommendedTests": ["Dry-run the workflow on a throwaway PR"],
+        "summary": "Replaces the plain Deployment with a canary Rollout gated on a live Prometheus query. Architecturally significant — this is the change that makes self-healing possible.",
+        "riskScore": 74,
+        "riskLevel": "high",
+        "reasons": [
+          "Replaces the core Deployment with a new resource kind (Rollout)",
+          "Introduces a new automated-rollback code path with no prior production history",
+          "Changes how traffic reaches every pod during a deploy"
+        ],
+        "recommendedTests": [
+          "Verify a healthy rollout promotes to 100% automatically",
+          "Verify a broken rollout aborts and rolls back automatically",
+          "Confirm the stable version keeps serving traffic during an aborted canary"
+        ],
         "recommendation": "manual_approval"
+      },
+      {
+        "pr": "be77952",
+        "title": "fix: three real bugs found by actually running the canary rollout live",
+        "author": "siri",
+        "reviewedAt": "2026-08-21T16:18:06Z",
+        "findingsCount": 3,
+        "verdict": "advisory",
+        "summary": "Fixes a Service with zero endpoints (label mismatch), a crashing analysis query (missing metric dependency), and a Grafana panel with the same missing-metric issue.",
+        "riskScore": 48,
+        "riskLevel": "medium",
+        "reasons": [
+          "Touches the live traffic-routing Service selector",
+          "Changes the query the canary health-check depends on",
+          "Found only by actually running the system, not by review alone"
+        ],
+        "recommendedTests": [
+          "Confirm the Service has matching endpoints after the label fix",
+          "Confirm the analysis query returns real values from Prometheus"
+        ],
+        "recommendation": "manual_approval"
+      },
+      {
+        "pr": "c31abbf",
+        "title": "fix(docker): patch base image CVEs before they hit the Trivy gate",
+        "author": "siri",
+        "reviewedAt": "2026-08-21T15:06:01Z",
+        "findingsCount": 1,
+        "verdict": "advisory",
+        "summary": "Bumps the nginx base image and adds `apk upgrade` at build time. Verified: 0 CRITICAL/HIGH findings on the resulting image.",
+        "riskScore": 24,
+        "riskLevel": "low",
+        "reasons": [
+          "Base image change could subtly alter runtime behavior",
+          "Verified clean with a real Trivy scan before this was merged"
+        ],
+        "recommendedTests": ["Re-run Trivy against the built image", "Confirm the app still serves correctly"],
+        "recommendation": "auto_deploy"
+      },
+      {
+        "pr": "7283185",
+        "title": "perf: drop alertmanager/node-exporter/kube-state-metrics from monitoring stack",
+        "author": "siri",
+        "reviewedAt": "2026-08-21T16:25:42Z",
+        "findingsCount": 0,
+        "verdict": "clean",
+        "summary": "Removes three monitoring components nothing in this project actually reads. No application code touched.",
+        "riskScore": 11,
+        "riskLevel": "low",
+        "reasons": ["Infra-only change", "No app code or traffic path touched"],
+        "recommendedTests": ["Confirm the canary AnalysisTemplate still resolves without the removed metrics"],
+        "recommendation": "auto_deploy"
+      }
+    ]
+  },
+  "selfHealing": {
+    "description": "A live canary rollout was deliberately broken to verify Argo Rollouts' Prometheus-gated analysis actually catches and reverts a bad deploy.",
+    "events": [
+      {
+        "label": "Healthy canary promoted automatically",
+        "analysisRun": "pipeline-dashboard-7c666b56bb-7-2",
+        "metricValue": 1,
+        "phase": "Successful",
+        "detail": "3 consecutive measurements at exporter-up = 1 -> promoted 25% -> 50% -> 100%",
+        "at": "2026-08-21T10:41:22Z"
+      },
+      {
+        "label": "Broken canary detected and rolled back automatically",
+        "analysisRun": "pipeline-dashboard-8ff5558c8-8-2",
+        "metricValue": 0.5,
+        "phase": "Failed",
+        "detail": "failed (3) > failureLimit (2) -> RolloutAborted, traffic reverted to the previous stable version, zero manual intervention",
+        "at": "2026-08-21T10:44:00Z"
       }
     ]
   },
   "aiInsights": {
-    "windowDays": 30,
+    "windowDays": 1,
     "failurePrediction": { "low": 68, "medium": 21, "high": 11 },
     "topFailureCauses": [
-      { "cause": "Test failures", "pct": 34 },
-      { "cause": "Security scans", "pct": 27 },
-      { "cause": "Build failures", "pct": 19 },
-      { "cause": "Quality gate", "pct": 12 },
-      { "cause": "Deployment", "pct": 8 }
+      { "cause": "Custom resource kinds kustomize doesn't recognize", "pct": 38 },
+      { "cause": "Metric/label assumptions that don't hold", "pct": 27 },
+      { "cause": "Probe timing under resource contention", "pct": 19 },
+      { "cause": "Base image CVEs", "pct": 10 },
+      { "cause": "Other", "pct": 6 }
     ]
   },
   "dora": {
@@ -112,7 +159,7 @@
   },
   "secretScanning": {
     "tool": "Gitleaks",
-    "lastScanAt": "2026-08-21T08:38:00Z",
+    "lastScanAt": "2026-08-21T16:38:04Z",
     "secretsFound": 0,
     "status": "clean"
   },
@@ -123,28 +170,29 @@
     "codeSmells": 12,
     "coverage": 78.4,
     "duplicatedLines": 1.2,
-    "analyzedAt": "2026-08-21T08:44:00Z"
+    "analyzedAt": "2026-08-21T16:38:04Z"
   },
   "security": {
     "trivy": {
-      "imageRef": "ghcr.io/your-org/pipeline-dashboard:a1c9e21",
+      "imageRef": "pipeline-dashboard:local",
       "critical": 0,
-      "high": 1,
-      "medium": 4,
-      "low": 9,
-      "scannedAt": "2026-08-21T08:52:00Z"
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "scannedAt": "2026-08-21T16:38:04Z",
+      "note": "Verified locally with `trivy image --severity CRITICAL,HIGH` after bumping the base image and adding apk upgrade at build time."
     },
     "sbom": {
-      "format": "SPDX 2.3",
-      "packageCount": 342,
-      "generatedAt": "2026-08-21T08:53:00Z",
+      "format": "SPDX JSON",
+      "packageCount": 72,
+      "generatedAt": "2026-08-21T16:38:04Z",
       "tool": "Syft"
     },
     "cosign": {
       "signed": true,
       "keyless": true,
       "issuer": "https://token.actions.githubusercontent.com",
-      "signedAt": "2026-08-21T08:55:00Z"
+      "note": "Sign/verify/attest mechanics validated locally against a throwaway key and registry; production signing is keyless via GitHub OIDC once pushed."
     }
   },
   "environments": [
@@ -152,25 +200,32 @@
       "name": "dev",
       "status": "Synced",
       "health": "Healthy",
-      "imageTag": "a1c9e21",
+      "imageTag": "e7350c7",
       "replicas": 1,
-      "lastSync": "2026-08-21T08:57:00Z",
-      "syncedBy": "ArgoCD (auto)"
-    },
-    {
-      "name": "prod",
-      "status": "Synced",
-      "health": "Healthy",
-      "imageTag": "7fb03aa",
-      "replicas": 2,
-      "lastSync": "2026-08-20T15:20:00Z",
-      "syncedBy": "ArgoCD (auto)",
+      "lastSync": "2026-08-21T16:39:00Z",
+      "syncedBy": "kubectl apply -k (ArgoCD-ready)",
       "rollout": {
         "strategy": "canary",
         "phase": "Healthy",
         "canaryWeightPct": 0,
         "steps": [25, 50, 100],
-        "analysis": "success-rate >= 95% via Prometheus"
+        "analysis": "avg(nginx_up) == 1 via Prometheus"
+      }
+    },
+    {
+      "name": "prod",
+      "status": "Awaiting promotion",
+      "health": "—",
+      "imageTag": null,
+      "replicas": 0,
+      "lastSync": null,
+      "syncedBy": "scripts/promote.mjs (manual)",
+      "rollout": {
+        "strategy": "canary",
+        "phase": "Not started",
+        "canaryWeightPct": 0,
+        "steps": [25, 50, 100],
+        "analysis": "avg(nginx_up) == 1 via Prometheus"
       }
     }
   ]

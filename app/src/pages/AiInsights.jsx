@@ -1,10 +1,11 @@
 import Topbar from '../components/Topbar'
 import FailurePredictionChart from '../components/FailurePredictionChart'
 import FailureSimulator from '../components/FailureSimulator'
+import SelfHealingLog from '../components/SelfHealingLog'
 import pipelineStatus from '../data/pipeline-status.json'
 
 export default function AiInsights() {
-  const { aiInsights, aiReview } = pipelineStatus
+  const { aiInsights, aiReview, selfHealing } = pipelineStatus
   const avgRisk = Math.round(
     aiReview.history.reduce((sum, h) => sum + h.riskScore, 0) / aiReview.history.length,
   )
@@ -13,7 +14,11 @@ export default function AiInsights() {
     <>
       <Topbar
         title="AI Insights"
-        subtitle={`Pipeline intelligence over the last ${aiInsights.windowDays} days`}
+        subtitle={
+          aiInsights.windowDays <= 1
+            ? "Pipeline intelligence from tonight's session"
+            : `Pipeline intelligence over the last ${aiInsights.windowDays} days`
+        }
       />
 
       <main className="flex-1 space-y-6 p-6">
@@ -52,6 +57,8 @@ export default function AiInsights() {
             </ul>
           </div>
         </div>
+
+        <SelfHealingLog selfHealing={selfHealing} />
 
         <FailureSimulator />
 

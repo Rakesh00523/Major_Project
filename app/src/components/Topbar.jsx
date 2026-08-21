@@ -1,12 +1,12 @@
-import { Moon, Sun, Bell } from 'lucide-react'
+import { Moon, Sun, Bell, Search } from 'lucide-react'
 import { useTheme } from '../lib/useTheme'
 import MobileNav from './MobileNav'
 
-export default function Topbar({ title, subtitle }) {
+export default function Topbar({ title, subtitle, search }) {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:px-6">
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:px-6">
       <div className="flex items-center gap-3">
         <MobileNav />
         <div>
@@ -16,6 +16,21 @@ export default function Topbar({ title, subtitle }) {
       </div>
 
       <div className="flex items-center gap-2">
+        {search && (
+          <div className="relative hidden sm:block">
+            <Search
+              size={14}
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="search"
+              value={search.value}
+              onChange={(e) => search.onChange(e.target.value)}
+              placeholder={search.placeholder ?? 'Search…'}
+              className="w-48 rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-sm text-slate-700 outline-none ring-indigo-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 lg:w-64"
+            />
+          </div>
+        )}
         <button
           type="button"
           className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"

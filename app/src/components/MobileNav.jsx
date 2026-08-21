@@ -16,7 +16,7 @@ import clsx from 'clsx'
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/deployments', label: 'Deployments', icon: Rocket },
-  { to: '/pull-requests', label: 'Pull Requests', icon: GitPullRequest },
+  { to: '/pull-requests', label: 'Code Reviews', icon: GitPullRequest },
   { to: '/ai-insights', label: 'AI Insights', icon: Sparkles },
   { to: '/security', label: 'Security', icon: ShieldCheck },
   { to: '/settings', label: 'Settings', icon: Settings },

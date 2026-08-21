@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 
@@ -23,6 +23,20 @@ describe('App routing', () => {
     expect(screen.getByText(/recent pipeline runs/i)).toBeInTheDocument()
   })
 
+  it('filters recent pipeline runs by the search box', () => {
+    renderAt('/dashboard')
+    const runsList = screen.getByText(/recent pipeline runs/i).closest('div')
+    expect(within(runsList).getByText('7283185')).toBeInTheDocument()
+    expect(within(runsList).getByText('012cf00')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText(/search commits/i), {
+      target: { value: 'grafana' },
+    })
+
+    expect(within(runsList).getByText('e7350c7')).toBeInTheDocument()
+    expect(within(runsList).queryByText('012cf00')).not.toBeInTheDocument()
+  })
+
   it('renders the deployments table at /deployments', () => {
     renderAt('/deployments')
     expect(screen.getByText(/dev/i)).toBeInTheDocument()
@@ -31,8 +45,8 @@ describe('App routing', () => {
 
   it('renders AI review history at /pull-requests', () => {
     renderAt('/pull-requests')
-    expect(screen.getByRole('heading', { name: /pull requests/i })).toBeInTheDocument()
-    expect(screen.getByText('#128')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /code reviews/i })).toBeInTheDocument()
+    expect(screen.getByText('32d32cc')).toBeInTheDocument()
   })
 
   it('renders failure prediction and top causes at /ai-insights', () => {

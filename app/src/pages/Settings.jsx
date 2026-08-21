@@ -1,36 +1,19 @@
+import { useState } from 'react'
 import { useTheme } from '../lib/useTheme'
 import Topbar from '../components/Topbar'
-
-function Toggle({ checked, onChange, label, description }) {
-  return (
-    <div className="flex items-center justify-between py-4">
-      <div>
-        <p className="text-sm font-medium text-slate-900 dark:text-white">{label}</p>
-        {description && (
-          <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={onChange}
-        role="switch"
-        aria-checked={checked}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-            checked ? 'translate-x-5' : 'translate-x-0.5'
-          }`}
-        />
-      </button>
-    </div>
-  )
-}
+import Toggle from '../components/Toggle'
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme()
+  const [notifications, setNotifications] = useState({
+    failedBuilds: true,
+    securityAlerts: true,
+    weeklySummary: false,
+  })
+
+  function setNotification(key) {
+    return (value) => setNotifications((prev) => ({ ...prev, [key]: value }))
+  }
 
   return (
     <>
@@ -54,9 +37,24 @@ export default function Settings() {
             Notifications
           </h3>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            <Toggle checked label="Failed build alerts" description="Notify on pipeline failure" onChange={() => {}} />
-            <Toggle checked label="Security scan alerts" description="Notify on new critical/high CVEs" onChange={() => {}} />
-            <Toggle label="Weekly summary email" description="Digest of build/deploy activity" onChange={() => {}} />
+            <Toggle
+              checked={notifications.failedBuilds}
+              onChange={setNotification('failedBuilds')}
+              label="Failed build alerts"
+              description="Notify on pipeline failure"
+            />
+            <Toggle
+              checked={notifications.securityAlerts}
+              onChange={setNotification('securityAlerts')}
+              label="Security scan alerts"
+              description="Notify on new critical/high CVEs"
+            />
+            <Toggle
+              checked={notifications.weeklySummary}
+              onChange={setNotification('weeklySummary')}
+              label="Weekly summary email"
+              description="Digest of build/deploy activity"
+            />
           </div>
         </div>
 
