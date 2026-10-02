@@ -90,7 +90,7 @@ export default function Login() {
                 <input
                   id="email"
                   type="email"
-                  defaultValue="siri@amotion.ai"
+                  defaultValue="JohnDoe@gmail.com"
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:ring-2"
                 />
               </div>
