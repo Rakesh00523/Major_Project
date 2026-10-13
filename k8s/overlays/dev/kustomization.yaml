@@ -17,7 +17,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: ghcr.io/your-org/pipeline-dashboard:placeholder
+        value: pipeline-dashboard:local
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
 
   - target:
       kind: Ingress

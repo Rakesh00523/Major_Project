@@ -16,7 +16,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: ghcr.io/your-org/pipeline-dashboard:placeholder
+        value: ghcr.io/your-org/pipeline-dashboard:local
       - op: replace
         path: /spec/replicas
         value: 2

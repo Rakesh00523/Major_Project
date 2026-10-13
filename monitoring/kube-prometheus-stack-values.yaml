@@ -43,7 +43,7 @@ prometheus:
     retention: 3d
     resources:
       requests: { cpu: 100m, memory: 256Mi }
-      limits: { cpu: 500m, memory: 512Mi }
+      limits: { cpu: 500m, memory: 1Gi }
     # Pick up ServiceMonitors from any namespace, not just `monitoring` —
     # the app's ServiceMonitor lives alongside the app in pipeline-dev/prod.
     serviceMonitorSelectorNilUsesHelmValues: false

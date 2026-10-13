@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T16:40:00Z",
+  "generatedAt": "2026-10-13T07:50:00Z",
   "pipeline": {
     "name": "ai-cicd-pipeline",
     "defaultBranch": "main",
@@ -34,7 +34,7 @@
   ],
   "aiReview": {
     "provider": "Google Gemini",
-    "model": "gemini-2.0-flash",
+    "model": "gemini-3.8-flash",
     "history": [
       {
         "pr": "32d32cc",
