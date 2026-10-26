@@ -1,9 +1,11 @@
 import { Moon, Sun, Bell, Search } from 'lucide-react'
 import { useTheme } from '../lib/useTheme'
+import { useAuth } from '../lib/AuthContext'
 import MobileNav from './MobileNav'
 
 export default function Topbar({ title, subtitle, search }) {
   const { theme, toggleTheme } = useTheme()
+  const { user } = useAuth()
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:px-6">
@@ -46,7 +48,12 @@ export default function Topbar({ title, subtitle, search }) {
         >
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
-        <div className="ml-2 h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600" />
+        <div
+          title={user?.name ? `${user.name} (${user.email})` : 'Authenticated'}
+          className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-semibold text-white shadow-sm"
+        >
+          {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+        </div>
       </div>
     </header>
   )

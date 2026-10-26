@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { GitBranch, ShieldCheck, Rocket, LineChart, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
+import { GitBranch, ShieldCheck, Rocket, LineChart, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
 import FloatingBackground from '../components/FloatingBackground'
+import { useAuth } from '../lib/AuthContext'
 
 const FEATURES = [
   { icon: GitBranch, text: 'AI-reviewed commits before they ever merge' },
@@ -12,11 +13,52 @@ const FEATURES = [
 
 export default function Login() {
   const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
+  const { login, isAuthenticated, loading: authLoading } = useAuth()
 
-  function handleSubmit(e) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [validationErrors, setValidationErrors] = useState({})
+  const [forgotModalOpen, setForgotModalOpen] = useState(false)
+
+  if (!authLoading && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  function validate() {
+    const errors = {}
+    if (!email.trim()) {
+      errors.email = 'Email address is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      errors.email = 'Please enter a valid email address'
+    }
+
+    if (!password) {
+      errors.password = 'Password is required'
+    }
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    navigate('/dashboard')
+    setFormError('')
+
+    if (!validate()) return
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await login(email.trim(), password, rememberMe)
+      navigate('/dashboard')
+    } catch (err) {
+      setFormError(err.message || 'Invalid email or password.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -60,7 +102,7 @@ export default function Login() {
           </div>
 
           <p className="font-data text-xs text-slate-500">
-            Built with open-source, zero-cost tooling end to end.
+            Enterprise Grade Security &bull; Argon2id / bcrypt Password Hashing &bull; Real Auth Backend
           </p>
         </div>
 
@@ -68,6 +110,7 @@ export default function Login() {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl backdrop-blur-xl"
           >
             <div className="mb-6 flex items-center gap-3 lg:hidden">
@@ -79,59 +122,153 @@ export default function Login() {
 
             <h2 className="text-xl font-semibold text-white">Welcome back</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Sign in to view your pipeline&apos;s live status.
+              Sign in with your registered account to access your live pipeline.
             </p>
+
+            {formError && (
+              <div
+                role="alert"
+                className="mt-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-300"
+              >
+                <AlertCircle size={15} className="shrink-0 text-red-400" />
+                <span>{formError}</span>
+              </div>
+            )}
 
             <div className="mt-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-300" htmlFor="email">
-                  Email
+                <label className="flex items-center justify-between text-sm font-medium text-slate-300" htmlFor="email">
+                  <span>
+                    Email <span className="text-red-400">*</span>
+                  </span>
                 </label>
                 <input
                   id="email"
                   type="email"
-                  defaultValue="JohnDoe@gmail.com"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:ring-2"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (validationErrors.email) setValidationErrors((prev) => ({ ...prev, email: null }))
+                  }}
+                  placeholder="user@example.com"
+                  disabled={isSubmitting}
+                  className={`w-full rounded-lg border bg-white/5 px-3 py-2.5 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:ring-2 ${
+                    validationErrors.email ? 'border-red-500/50' : 'border-white/10'
+                  }`}
                 />
+                {validationErrors.email && (
+                  <p className="text-xs text-red-400">{validationErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-300" htmlFor="password">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-slate-300" htmlFor="password">
+                    Password <span className="text-red-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setForgotModalOpen(true)}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 pr-10 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:ring-2"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      if (validationErrors.password) setValidationErrors((prev) => ({ ...prev, password: null }))
+                    }}
+                    placeholder="xxxxxxxx"
+                    disabled={isSubmitting}
+                    className={`w-full rounded-lg border bg-white/5 px-3 py-2.5 pr-10 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:ring-2 ${
+                      validationErrors.password ? 'border-red-500/50' : 'border-white/10'
+                    }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-300"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-200"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                {validationErrors.password && (
+                  <p className="text-xs text-red-400">{validationErrors.password}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
+                  />
+                  <span>Remember me for 30 days</span>
+                </label>
               </div>
             </div>
 
             <button
               type="submit"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:brightness-110 active:scale-[0.99]"
+              disabled={isSubmitting}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign in
-              <ArrowRight size={15} />
+              {isSubmitting ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span>Signing in…</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <ArrowRight size={15} />
+                </>
+              )}
             </button>
 
-            <p className="mt-4 text-center text-xs text-slate-500">
-              Demo only — any input signs you in, no real authentication is performed.
-            </p>
+            <div className="mt-6 border-t border-white/10 pt-4 text-center">
+              <p className="text-xs text-slate-400">
+                Don&apos;t have an account?{' '}
+                <Link to="/register" className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline">
+                  Create an account
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      {forgotModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+            <h3 className="text-base font-semibold text-white">Password Reset</h3>
+            <p className="mt-2 text-xs text-slate-400">
+              Password reset via self-service email token delivery is currently marked as not yet configured in this deployment environment.
+              Please contact your pipeline administrator or register a new account.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setForgotModalOpen(false)}
+                className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

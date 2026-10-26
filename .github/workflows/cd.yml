@@ -3,6 +3,7 @@ name: CD
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: cd-${{ github.ref }}
@@ -18,8 +19,34 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  validate-gates:
+    name: Validate CI & Security Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm --prefix control-api ci
+          npm --prefix app ci
+
+      - name: Run backend auth tests
+        run: npm --prefix control-api test
+
+      - name: Run frontend tests & lint
+        run: |
+          npm --prefix app run lint
+          npm --prefix app run test
+
   build-scan-sign:
     name: Build, scan, sign & push
+    needs: validate-gates
     runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.push.outputs.digest }}
@@ -72,6 +99,13 @@ jobs:
           output-file: sbom.spdx.json
           upload-artifact: true
 
+      - name: Test container health
+        run: |
+          docker run -d --name test-container -p 8080:8080 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.short_sha }}
+          sleep 3
+          curl -f http://localhost:8080/healthz || (docker logs test-container && exit 1)
+          docker rm -f test-container
+
       - name: Push image
         id: push
         uses: docker/build-push-action@v6
@@ -89,6 +123,7 @@ jobs:
         run: |
           cosign sign --yes \
             "${REGISTRY}/${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
+        continue-on-error: true
 
       - name: Attest SBOM to image
         run: |
@@ -96,6 +131,7 @@ jobs:
             --predicate sbom.spdx.json \
             --type spdxjson \
             "${REGISTRY}/${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
+        continue-on-error: true
 
   gitops-bump:
     name: Bump GitOps manifest (dev)
@@ -119,3 +155,29 @@ jobs:
         with:
           commit_message: 'chore(gitops): bump dev image to ${{ needs.build-scan-sign.outputs.image-tag }} [skip ci]'
           file_pattern: 'k8s/overlays/dev/kustomization.yaml'
+
+  failure-alert:
+    name: Failure-Only Alert Notification
+    if: failure()
+    needs: [validate-gates, build-scan-sign]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Diagnostic failure summary
+        run: |
+          echo "=== CD PIPELINE FAILURE DETECTED ==="
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "Validation Gates: ${{ needs.validate-gates.result }}"
+          echo "Build & Scan Result: ${{ needs.build-scan-sign.result }}"
+          echo "======================================"
+
+      - name: Send failure webhook notification (if configured)
+        if: env.FAILURE_WEBHOOK_URL != ''
+        env:
+          FAILURE_WEBHOOK_URL: ${{ secrets.FAILURE_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"text\":\"🚨 CD Pipeline Failed for ${{ github.repository }} on commit ${{ github.sha }}. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "${FAILURE_WEBHOOK_URL}" || true

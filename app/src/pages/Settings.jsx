@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useTheme } from '../lib/useTheme'
+import { useAuth } from '../lib/AuthContext'
 import Topbar from '../components/Topbar'
 import Toggle from '../components/Toggle'
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme()
+  const { user } = useAuth()
   const [notifications, setNotifications] = useState({
     failedBuilds: true,
     securityAlerts: true,
@@ -60,7 +62,8 @@ export default function Settings() {
 
         <div className="max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h3 className="mb-1 text-sm font-semibold text-slate-900 dark:text-white">Account</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">siri@amotion.ai</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-white">{user?.name || 'Administrator'}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email || 'admin@pipeline.local'}</p>
         </div>
       </main>
     </>

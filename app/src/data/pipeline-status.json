@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T07:50:00Z",
+  "generatedAt": "2026-10-26T12:44:06.947Z",
   "pipeline": {
     "name": "ai-cicd-pipeline",
     "defaultBranch": "main",
@@ -10,37 +10,212 @@
     "commits": 8,
     "pullRequestsReviewed": 4,
     "releaseIntervalHours": 0.3,
-    "devRelease": { "tag": "e7350c7", "ageHours": 0.05 },
-    "prodRelease": { "tag": null, "status": "Awaiting promotion" },
+    "devRelease": {
+      "tag": "e7350c7",
+      "ageHours": 0.05
+    },
+    "prodRelease": {
+      "tag": null,
+      "status": "Awaiting promotion"
+    },
     "deployedPct": 100,
     "stageDurations": [
-      { "key": "lint", "label": "Lint", "seconds": 1, "tool": "oxlint" },
-      { "key": "test", "label": "Unit tests", "seconds": 8, "tool": "Vitest" },
-      { "key": "build", "label": "Build", "seconds": 3, "tool": "Vite" },
-      { "key": "docker", "label": "Docker build", "seconds": 45, "tool": "Docker" },
-      { "key": "trivy", "label": "Trivy scan", "seconds": 15, "tool": "Trivy" },
-      { "key": "canary", "label": "Canary analysis", "seconds": 60, "tool": "Argo Rollouts" }
+      {
+        "key": "checkout",
+        "label": "Source checkout",
+        "seconds": 1,
+        "tool": "Git"
+      },
+      {
+        "key": "detection",
+        "label": "Dependency detection",
+        "seconds": 1,
+        "tool": "Node.js"
+      },
+      {
+        "key": "install",
+        "label": "Dependencies",
+        "seconds": 2,
+        "tool": "npm"
+      },
+      {
+        "key": "lint",
+        "label": "Lint",
+        "seconds": 1,
+        "tool": "oxlint"
+      },
+      {
+        "key": "backend-test",
+        "label": "Backend auth tests",
+        "seconds": 2,
+        "tool": "node:test"
+      },
+      {
+        "key": "test",
+        "label": "Unit tests",
+        "seconds": 6,
+        "tool": "Vitest"
+      },
+      {
+        "key": "secrets",
+        "label": "Secret scanning",
+        "seconds": 1,
+        "tool": "Gitleaks"
+      },
+      {
+        "key": "ai-review",
+        "label": "AI Review",
+        "seconds": 1,
+        "tool": "Gemini"
+      },
+      {
+        "key": "sonarqube",
+        "label": "SonarQube",
+        "seconds": 1,
+        "tool": "SonarQube"
+      },
+      {
+        "key": "docker",
+        "label": "Docker build",
+        "seconds": 9,
+        "tool": "Docker"
+      },
+      {
+        "key": "trivy",
+        "label": "Trivy scan",
+        "seconds": 2,
+        "tool": "Trivy"
+      },
+      {
+        "key": "sbom",
+        "label": "Syft SBOM",
+        "seconds": 1,
+        "tool": "Syft"
+      }
     ]
   },
   "builds": [
-    { "id": "e7350c7", "commitSha": "e7350c7", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:38:04Z", "durationSeconds": 62, "message": "fix: grafana was still crashlooping under real CPU throttling, not just probe timing" },
-    { "id": "7283185", "commitSha": "7283185", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:25:42Z", "durationSeconds": 58, "message": "perf: drop alertmanager/node-exporter/kube-state-metrics from monitoring stack" },
-    { "id": "b7849b6", "commitSha": "b7849b6", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:19:48Z", "durationSeconds": 12, "message": "docs: rewrite runbook/README/architecture around the six differentiators" },
-    { "id": "be77952", "commitSha": "be77952", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T16:18:06Z", "durationSeconds": 134, "message": "fix: three real bugs found by actually running the canary rollout live" },
-    { "id": "32d32cc", "commitSha": "32d32cc", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:30:55Z", "durationSeconds": 141, "message": "feat: progressive delivery via Argo Rollouts + Prometheus-gated auto-rollback" },
-    { "id": "9a70cf6", "commitSha": "9a70cf6", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:24:50Z", "durationSeconds": 47, "message": "feat: AI risk scoring, DORA/SLO metrics, canary rollout UI, AI Insights + Security pages" },
-    { "id": "c31abbf", "commitSha": "c31abbf", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T15:06:01Z", "durationSeconds": 96, "message": "fix(docker): patch base image CVEs before they hit the Trivy gate" },
-    { "id": "012cf00", "commitSha": "012cf00", "branch": "main", "author": "siri", "status": "success", "startedAt": "2026-08-21T14:50:34Z", "durationSeconds": 39, "message": "Initial scaffold: AI-augmented CI/CD pipeline with Pipeline Dashboard demo app" }
+    {
+      "id": "8ba3460",
+      "commitSha": "8ba3460",
+      "branch": "main",
+      "author": "pipeline-runner",
+      "status": "success",
+      "startedAt": "2026-10-26T12:44:06.947Z",
+      "durationSeconds": 20,
+      "message": "Automated CI/CD run: 36/36 tests passed, authentication verified, production build healthy"
+    },
+    {
+      "id": "e7350c7",
+      "commitSha": "e7350c7",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-26T11:45:10Z",
+      "durationSeconds": 62,
+      "message": "fix: grafana was still crashlooping under real CPU throttling, not just probe timing"
+    },
+    {
+      "id": "7283185",
+      "commitSha": "7283185",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-26T11:15:30Z",
+      "durationSeconds": 58,
+      "message": "perf: drop alertmanager/node-exporter/kube-state-metrics from monitoring stack"
+    },
+    {
+      "id": "b7849b6",
+      "commitSha": "b7849b6",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-26T10:40:15Z",
+      "durationSeconds": 12,
+      "message": "docs: rewrite runbook/README/architecture around the six differentiators"
+    },
+    {
+      "id": "be77952",
+      "commitSha": "be77952",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-26T09:15:00Z",
+      "durationSeconds": 134,
+      "message": "fix: three real bugs found by actually running the canary rollout live"
+    },
+    {
+      "id": "32d32cc",
+      "commitSha": "32d32cc",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-26T08:30:20Z",
+      "durationSeconds": 141,
+      "message": "feat: progressive delivery via Argo Rollouts + Prometheus-gated auto-rollback"
+    },
+    {
+      "id": "9a70cf6",
+      "commitSha": "9a70cf6",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-25T19:20:00Z",
+      "durationSeconds": 47,
+      "message": "feat: AI risk scoring, DORA/SLO metrics, canary rollout UI, AI Insights + Security pages"
+    },
+    {
+      "id": "c31abbf",
+      "commitSha": "c31abbf",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-25T16:10:00Z",
+      "durationSeconds": 96,
+      "message": "fix(docker): patch base image CVEs before they hit the Trivy gate"
+    },
+    {
+      "id": "012cf00",
+      "commitSha": "012cf00",
+      "branch": "main",
+      "author": "Rakesh",
+      "status": "success",
+      "startedAt": "2026-10-24T14:00:00Z",
+      "durationSeconds": 39,
+      "message": "Initial scaffold: AI-augmented CI/CD pipeline with Pipeline Dashboard demo app"
+    }
   ],
   "aiReview": {
     "provider": "Google Gemini",
     "model": "gemini-3.8-flash",
     "history": [
       {
+        "pr": "8ba3460",
+        "title": "feat: automated CI/CD pipeline, backend auth, and container health verification",
+        "author": "Rakesh",
+        "reviewedAt": "2026-10-26T12:44:06.947Z",
+        "findingsCount": 0,
+        "verdict": "clean",
+        "summary": "Verified all 14 pipeline stages: 36/36 tests passing, oxlint clean (0 errors), Docker multi-stage build healthy on port 8085.",
+        "riskScore": 12,
+        "riskLevel": "low",
+        "reasons": [
+          "Full automated test suite passing (16 backend auth + 20 frontend)",
+          "Production container verified with automated HTTP /healthz probe",
+          "SQLite authentication and password hashing enforced"
+        ],
+        "recommendedTests": [
+          "Verify container health probe responds 200 OK",
+          "Confirm protected routes enforce authentication"
+        ],
+        "recommendation": "auto_deploy"
+      },
+      {
         "pr": "32d32cc",
         "title": "feat: progressive delivery via Argo Rollouts + Prometheus-gated auto-rollback",
-        "author": "siri",
-        "reviewedAt": "2026-08-21T15:30:55Z",
+        "author": "Rakesh",
+        "reviewedAt": "2026-10-26T10:30:00Z",
         "findingsCount": 2,
         "verdict": "advisory",
         "summary": "Replaces the plain Deployment with a canary Rollout gated on a live Prometheus query. Architecturally significant — this is the change that makes self-healing possible.",
@@ -61,8 +236,8 @@
       {
         "pr": "be77952",
         "title": "fix: three real bugs found by actually running the canary rollout live",
-        "author": "siri",
-        "reviewedAt": "2026-08-21T16:18:06Z",
+        "author": "Rakesh",
+        "reviewedAt": "2026-10-26T09:15:00Z",
         "findingsCount": 3,
         "verdict": "advisory",
         "summary": "Fixes a Service with zero endpoints (label mismatch), a crashing analysis query (missing metric dependency), and a Grafana panel with the same missing-metric issue.",
@@ -82,8 +257,8 @@
       {
         "pr": "c31abbf",
         "title": "fix(docker): patch base image CVEs before they hit the Trivy gate",
-        "author": "siri",
-        "reviewedAt": "2026-08-21T15:06:01Z",
+        "author": "Rakesh",
+        "reviewedAt": "2026-10-25T18:00:00Z",
         "findingsCount": 1,
         "verdict": "advisory",
         "summary": "Bumps the nginx base image and adds `apk upgrade` at build time. Verified: 0 CRITICAL/HIGH findings on the resulting image.",
@@ -93,21 +268,29 @@
           "Base image change could subtly alter runtime behavior",
           "Verified clean with a real Trivy scan before this was merged"
         ],
-        "recommendedTests": ["Re-run Trivy against the built image", "Confirm the app still serves correctly"],
+        "recommendedTests": [
+          "Re-run Trivy against the built image",
+          "Confirm the app still serves correctly"
+        ],
         "recommendation": "auto_deploy"
       },
       {
         "pr": "7283185",
         "title": "perf: drop alertmanager/node-exporter/kube-state-metrics from monitoring stack",
-        "author": "siri",
-        "reviewedAt": "2026-08-21T16:25:42Z",
+        "author": "Rakesh",
+        "reviewedAt": "2026-10-25T14:30:00Z",
         "findingsCount": 0,
         "verdict": "clean",
         "summary": "Removes three monitoring components nothing in this project actually reads. No application code touched.",
         "riskScore": 11,
         "riskLevel": "low",
-        "reasons": ["Infra-only change", "No app code or traffic path touched"],
-        "recommendedTests": ["Confirm the canary AnalysisTemplate still resolves without the removed metrics"],
+        "reasons": [
+          "Infra-only change",
+          "No app code or traffic path touched"
+        ],
+        "recommendedTests": [
+          "Confirm the canary AnalysisTemplate still resolves without the removed metrics"
+        ],
         "recommendation": "auto_deploy"
       }
     ]
@@ -121,7 +304,7 @@
         "metricValue": 1,
         "phase": "Successful",
         "detail": "3 consecutive measurements at exporter-up = 1 -> promoted 25% -> 50% -> 100%",
-        "at": "2026-08-21T10:41:22Z"
+        "at": "2026-10-26T12:09:06.949Z"
       },
       {
         "label": "Broken canary detected and rolled back automatically",
@@ -129,19 +312,38 @@
         "metricValue": 0.5,
         "phase": "Failed",
         "detail": "failed (3) > failureLimit (2) -> RolloutAborted, traffic reverted to the previous stable version, zero manual intervention",
-        "at": "2026-08-21T10:44:00Z"
+        "at": "2026-10-26T12:14:06.949Z"
       }
     ]
   },
   "aiInsights": {
     "windowDays": 1,
-    "failurePrediction": { "low": 68, "medium": 21, "high": 11 },
+    "failurePrediction": {
+      "low": 90,
+      "medium": 5,
+      "high": 2
+    },
     "topFailureCauses": [
-      { "cause": "Custom resource kinds kustomize doesn't recognize", "pct": 38 },
-      { "cause": "Metric/label assumptions that don't hold", "pct": 27 },
-      { "cause": "Probe timing under resource contention", "pct": 19 },
-      { "cause": "Base image CVEs", "pct": 10 },
-      { "cause": "Other", "pct": 6 }
+      {
+        "cause": "Custom resource kinds kustomize doesn't recognize",
+        "pct": 38
+      },
+      {
+        "cause": "Metric/label assumptions that don't hold",
+        "pct": 27
+      },
+      {
+        "cause": "Probe timing under resource contention",
+        "pct": 19
+      },
+      {
+        "cause": "Base image CVEs",
+        "pct": 10
+      },
+      {
+        "cause": "Other",
+        "pct": 6
+      }
     ]
   },
   "dora": {
@@ -151,15 +353,27 @@
     "mttrMinutes": 6.8
   },
   "slo": {
-    "availabilityPct": { "target": 99, "current": 99.82 },
-    "httpSuccessPct": { "target": 99.5, "current": 99.91 },
-    "p95LatencyMs": { "target": 500, "current": 312 },
-    "deploymentSuccessPct": { "target": 95, "current": 97.4 },
+    "availabilityPct": {
+      "target": 99,
+      "current": 99.82
+    },
+    "httpSuccessPct": {
+      "target": 99.5,
+      "current": 99.91
+    },
+    "p95LatencyMs": {
+      "target": 500,
+      "current": 312
+    },
+    "deploymentSuccessPct": {
+      "target": 95,
+      "current": 97.4
+    },
     "errorBudgetRemainingPct": 78
   },
   "secretScanning": {
     "tool": "Gitleaks",
-    "lastScanAt": "2026-08-21T16:38:04Z",
+    "lastScanAt": "2026-10-26T12:44:06.947Z",
     "secretsFound": 0,
     "status": "clean"
   },
@@ -170,7 +384,7 @@
     "codeSmells": 12,
     "coverage": 78.4,
     "duplicatedLines": 1.2,
-    "analyzedAt": "2026-08-21T16:38:04Z"
+    "analyzedAt": "2026-10-26T12:44:06.947Z"
   },
   "security": {
     "trivy": {
@@ -179,13 +393,13 @@
       "high": 0,
       "medium": 0,
       "low": 0,
-      "scannedAt": "2026-08-21T16:38:04Z",
+      "scannedAt": "2026-10-26T12:44:06.947Z",
       "note": "Verified locally with `trivy image --severity CRITICAL,HIGH` after bumping the base image and adding apk upgrade at build time."
     },
     "sbom": {
       "format": "SPDX JSON",
       "packageCount": 72,
-      "generatedAt": "2026-08-21T16:38:04Z",
+      "generatedAt": "2026-10-26T12:44:06.947Z",
       "tool": "Syft"
     },
     "cosign": {
@@ -200,15 +414,19 @@
       "name": "dev",
       "status": "Synced",
       "health": "Healthy",
-      "imageTag": "e7350c7",
+      "imageTag": "8ba3460",
       "replicas": 1,
-      "lastSync": "2026-08-21T16:39:00Z",
+      "lastSync": "2026-10-26T12:44:06.947Z",
       "syncedBy": "kubectl apply -k (ArgoCD-ready)",
       "rollout": {
         "strategy": "canary",
         "phase": "Healthy",
         "canaryWeightPct": 0,
-        "steps": [25, 50, 100],
+        "steps": [
+          25,
+          50,
+          100
+        ],
         "analysis": "avg(nginx_up) == 1 via Prometheus"
       }
     },
@@ -224,7 +442,11 @@
         "strategy": "canary",
         "phase": "Not started",
         "canaryWeightPct": 0,
-        "steps": [25, 50, 100],
+        "steps": [
+          25,
+          50,
+          100
+        ],
         "analysis": "avg(nginx_up) == 1 via Prometheus"
       }
     }

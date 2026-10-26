@@ -1,24 +1,21 @@
-// Local control API for the Pipeline Control page's "Live cluster" mode.
-//
-// This talks to the REAL Minikube cluster via kubectl -- the same exact
-// commands that were run manually and verified earlier tonight (see
-// docs/RUNBOOK.md section 5). It intentionally binds to 127.0.0.1 only:
-// this is a local demo tool that can execute cluster-admin commands, not
-// a service meant to ever be reachable from the network.
-//
-// Scope, honestly: only the deploy/canary/rollback mechanism is wired up
-// here, because that's the part that genuinely lives in the cluster. The
-// CI-side stages (lint, test, Trivy, SBOM, Cosign, GitOps bump) only ever
-// run in GitHub Actions and aren't something a local button can trigger
-// for real -- the Pipeline Control page still shows those as verified
-// history/simulation, and only labels this part "live".
+// Local control and authentication API for the AI-Augmented CI/CD Pipeline.
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { execFile } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import { getDb } from './db.mjs'
+import {
+  handleRegister,
+  handleLogin,
+  handleMe,
+  handleLogout,
+  authMiddleware,
+} from './auth.mjs'
 
 const NAMESPACE = 'pipeline-dev'
 const ROLLOUT = 'pipeline-dashboard'
-const PORT = 4001
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4001
 
 const HEALTHY_ARGS = ['-nginx.scrape-uri=http://127.0.0.1:8080/nginx_status']
 const BROKEN_ARGS = ['-nginx.scrape-uri=http://127.0.0.1:8080/this-path-does-not-exist']
@@ -37,20 +34,57 @@ async function kubectlJson(args) {
   return JSON.parse(out)
 }
 
+const db = getDb()
 const app = express()
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:8081'] }))
-app.use(express.json())
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+]
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true)
+      }
+      return callback(null, true)
+    },
+    credentials: true,
+  }),
+)
+app.use(express.json())
+app.use(cookieParser())
+
+// Public Health Check (used by container and k8s probes)
 app.get('/api/health', async (_req, res) => {
   try {
-    await kubectl(['-n', NAMESPACE, 'get', 'rollout', ROLLOUT, '-o', 'name'])
-    res.json({ ok: true })
+    db.prepare('SELECT 1').get()
+    let clusterHealthy = false
+    try {
+      await kubectl(['-n', NAMESPACE, 'get', 'rollout', ROLLOUT, '-o', 'name'])
+      clusterHealthy = true
+    } catch {
+      clusterHealthy = false
+    }
+    res.json({ ok: true, database: 'connected', cluster: clusterHealthy })
   } catch (err) {
     res.status(503).json({ ok: false, error: err.message })
   }
 })
 
-app.get('/api/status', async (_req, res) => {
+// Authentication Routes
+app.post('/api/auth/register', handleRegister(db))
+app.post('/api/auth/login', handleLogin(db))
+app.get('/api/auth/me', authMiddleware(db), handleMe())
+app.post('/api/auth/logout', authMiddleware(db), handleLogout(db))
+
+// Protected Cluster Management Routes (requires valid login session)
+app.get('/api/status', authMiddleware(db), async (_req, res) => {
   try {
     const [rollout, analysisRuns, pods] = await Promise.all([
       kubectlJson(['-n', NAMESPACE, 'get', 'rollout', ROLLOUT, '-o', 'json']),
@@ -58,10 +92,10 @@ app.get('/api/status', async (_req, res) => {
       kubectlJson(['-n', NAMESPACE, 'get', 'pods', '-o', 'json']),
     ])
 
-    const latestRun = analysisRuns.items
-      .sort((a, b) => new Date(b.metadata.creationTimestamp) - new Date(a.metadata.creationTimestamp))[0]
+    const latestRun = (analysisRuns.items || [])
+      .sort((a, b) => new Date(b.metadata?.creationTimestamp || 0) - new Date(a.metadata?.creationTimestamp || 0))[0]
 
-    const currentArgs = rollout.spec.template.spec.containers[1]?.args ?? []
+    const currentArgs = rollout.spec?.template?.spec?.containers?.[1]?.args ?? []
     const injected = currentArgs.some((a) => a.includes('this-path-does-not-exist'))
 
     res.json({
@@ -75,25 +109,25 @@ app.get('/api/status', async (_req, res) => {
       },
       analysisRun: latestRun
         ? {
-            name: latestRun.metadata.name,
+            name: latestRun.metadata?.name,
             phase: latestRun.status?.phase ?? 'Pending',
             value: latestRun.status?.metricResults?.[0]?.measurements?.slice(-1)?.[0]?.value ?? null,
-            createdAt: latestRun.metadata.creationTimestamp,
+            createdAt: latestRun.metadata?.creationTimestamp,
           }
         : null,
-      pods: pods.items.map((p) => ({
-        name: p.metadata.name,
-        phase: p.status.phase,
-        ready: p.status.containerStatuses?.every((c) => c.ready) ?? false,
+      pods: (pods.items || []).map((p) => ({
+        name: p.metadata?.name,
+        phase: p.status?.phase,
+        ready: p.status?.containerStatuses?.every((c) => c.ready) ?? false,
       })),
       failureInjected: injected,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(503).json({ ok: false, error: `Kubernetes cluster unreachable: ${err.message}` })
   }
 })
 
-app.post('/api/restore', async (_req, res) => {
+app.post('/api/restore', authMiddleware(db), async (_req, res) => {
   try {
     await kubectl([
       '-n', NAMESPACE, 'patch', 'rollout', ROLLOUT, '--type=json',
@@ -107,7 +141,7 @@ app.post('/api/restore', async (_req, res) => {
   }
 })
 
-app.post('/api/deploy', async (req, res) => {
+app.post('/api/deploy', authMiddleware(db), async (req, res) => {
   const injectFailure = req.body?.injectFailure === true
   try {
     const patches = [
@@ -131,6 +165,10 @@ app.post('/api/deploy', async (req, res) => {
   }
 })
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`[control-api] listening on http://127.0.0.1:${PORT} (localhost only)`)
-})
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[control-api] listening on port ${PORT}`)
+  })
+}
+
+export { app, db }

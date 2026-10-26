@@ -16,3 +16,15 @@ npm-debug.log*
 sbom*.json
 trivy-results.sarif
 *.log
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+
+# Local SQLite databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+control-api/data/

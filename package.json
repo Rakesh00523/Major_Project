@@ -1,0 +1,14 @@
+{
+  "name": "ai-cicd-pipeline-root",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test:backend": "npm --prefix control-api test",
+    "test:frontend": "npm --prefix app test",
+    "test": "npm run test:backend && npm run test:frontend",
+    "lint": "npm --prefix app run lint",
+    "build": "npm --prefix app run build",
+    "pipeline": "node scripts/local-pipeline.mjs"
+  }
+}

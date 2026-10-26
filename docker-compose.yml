@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  control-api:
+    build:
+      context: ./control-api
+      dockerfile: Dockerfile
+    container_name: pipeline-control-api
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+      - DB_PATH=/app/data/pipeline.db
+    volumes:
+      - pipeline-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4001/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: pipeline-dashboard
+    ports:
+      - "8080:8080"
+    depends_on:
+      control-api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  pipeline-data:

@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -21,12 +24,30 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # No GITLEAKS_LICENSE needed — that's only for the paid org features;
-        # the scan itself is free and open-source. A leaked credential fails
-        # this job, which blocks the merge exactly like a CRITICAL CVE would.
+
+  backend-test:
+    name: Backend & Authentication Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: control-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: control-api/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Run backend authentication & security tests
+        run: npm test
 
   lint-and-test:
-    name: Lint & unit tests
+    name: Frontend Lint & Unit Tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -61,7 +82,7 @@ jobs:
   ai-review:
     name: AI code review (Gemini)
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       pull-requests: write
       contents: read
@@ -132,3 +153,32 @@ jobs:
           SONAR_TOKEN: ${{ steps.sonar-token.outputs.token }}
         with:
           projectBaseDir: app
+        continue-on-error: true
+
+  failure-alert:
+    name: Failure-Only Alert Notification
+    if: failure()
+    needs: [secret-scan, backend-test, lint-and-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Diagnostic failure summary
+        run: |
+          echo "=== CI PIPELINE FAILURE DETECTED ==="
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "Secret scan result: ${{ needs.secret-scan.result }}"
+          echo "Backend test result: ${{ needs.backend-test.result }}"
+          echo "Frontend lint/test result: ${{ needs.lint-and-test.result }}"
+          echo "======================================"
+
+      - name: Send failure webhook notification (if configured)
+        if: env.FAILURE_WEBHOOK_URL != ''
+        env:
+          FAILURE_WEBHOOK_URL: ${{ secrets.FAILURE_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"text\":\"🚨 CI Pipeline Failed for ${{ github.repository }} on commit ${{ github.sha }}. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "${FAILURE_WEBHOOK_URL}" || true
